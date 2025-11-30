@@ -1,5 +1,5 @@
+#include "auth.h"
 #include "mainwindow.h"
-#include "auth.h""
 
 #include <QApplication>
 
@@ -10,11 +10,10 @@ int main(int argc, char *argv[])
     Auth auth;
     auth.show();
     auth.exec();
-    if (auth.getUsername().size() > 3){
+    if (auth.getUsername().size() > 3) {
         w.setUsername(auth.getUsername());
         w.show();
-    }
-    else{
+    } else {
         a.exit(0);
         return 0;
     }
