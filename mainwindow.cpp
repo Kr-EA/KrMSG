@@ -4,11 +4,11 @@
 #include "./ui_mainwindow.h"
 #include "appprotocol.h"
 
-#include <QLabel>
 #include <QDebug>
-#include <QString>
-#include <QScrollBar>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QScrollBar>
+#include <QString>
 #include <QVBoxLayout>
 #include <vector>
 
@@ -19,15 +19,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(this, &MainWindow::message,
-            this, &MainWindow::messageReciever);
+    connect(this, &MainWindow::message, this, &MainWindow::messageReciever);
 
-    connect(ui->sendMessage, &QPushButton::clicked,
-            this, &MainWindow::onSendButtonClicked);
+    connect(ui->sendMessage, &QPushButton::clicked, this, &MainWindow::onSendButtonClicked);
 
-
-    connect(ui->messageInput, &QLineEdit::returnPressed,
-            this, &MainWindow::onSendButtonClicked);
+    connect(ui->messageInput, &QLineEdit::returnPressed, this, &MainWindow::onSendButtonClicked);
 
     QWidget *container = new QWidget();
     chatLayout = new QVBoxLayout(container);
@@ -46,13 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     auto bar = ui->chatView->verticalScrollBar();
-    connect(bar, &QScrollBar::rangeChanged, this,
-            [bar](int /*min*/, int /*max*/) {
-                bar->setValue(bar->maximum());
-            });
+    connect(bar, &QScrollBar::rangeChanged, this, [bar](int /*min*/, int /*max*/) {
+        bar->setValue(bar->maximum());
+    });
 }
 
-void MainWindow::setUsername(QString val){
+void MainWindow::setUsername(QString val)
+{
     username = val;
     AppProtocol data(2, username.toStdString());
     std::vector<uint8_t> packet = data.getCode();
@@ -79,12 +75,12 @@ void MainWindow::addMessage(const QString &author, const QString &text, bool fro
 
     msgWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    label->setStyleSheet(
-        "padding:6px 10px;"
-        "border-radius:8px;"
-        "background:" + QString(fromMe ? "#6a1b9a" : "#424242") + ";"
-                                                    "color:white;"
-        );
+    label->setStyleSheet("padding:6px 10px;"
+                         "border-radius:8px;"
+                         "background:"
+                         + QString(fromMe ? "#6a1b9a" : "#424242")
+                         + ";"
+                           "color:white;");
 
     if (fromMe) {
         h->addStretch();
@@ -114,8 +110,7 @@ void MainWindow::onSendButtonClicked()
     std::string input = text.toStdString();
     std::vector<std::string> fragments = m_connection.messageFragmentation(input, 256);
 
-    for(std::string fragment: fragments){
-
+    for (std::string fragment : fragments) {
         addMessage(me, QString::fromStdString(fragment), true);
 
         AppProtocol data(1, fragment);
@@ -136,15 +131,14 @@ void MainWindow::receiveLoop()
 
         int flag = 0;
 
-        for (int i = 0; i < reply.size(); i++){
-            if (reply[i] == ':'){
+        for (int i = 0; i < reply.size(); i++) {
+            if (reply[i] == ':') {
                 flag = 1;
                 continue;
             }
-            if (flag == 0){
+            if (flag == 0) {
                 author += reply[i];
-            }
-            else {
+            } else {
                 answer += reply[i];
             }
         }
