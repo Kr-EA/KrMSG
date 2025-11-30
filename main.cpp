@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "auth.h""
+#include "auth.h"
 
 #include <QApplication>
 
