@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #ifdef _WIN32
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -16,10 +16,10 @@ using socket_t = SOCKET;
 #define INVALID_SOCKET (SOCKET)(~0)
 #endif
 #else
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 using socket_t = int;
 #ifndef INVALID_SOCKET
@@ -27,12 +27,13 @@ using socket_t = int;
 #endif
 #endif
 
-class TCPConnection {
+class TCPConnection
+{
 public:
-    TCPConnection(const char* HOST, const char* PORT, int BUFFER_SIZE);
+    TCPConnection(const char *HOST, const char *PORT, int BUFFER_SIZE);
     ~TCPConnection();
 
-    void sendMessage(const std::vector<uint8_t>& data);
+    void sendMessage(const std::vector<uint8_t> &data);
     std::string receiveMessage();
     void closeConnection();
 
@@ -44,5 +45,5 @@ private:
     socket_t sock{INVALID_SOCKET};
     int buffer_size{0};
 
-    static bool recvAll(socket_t s, uint8_t* buf, size_t len);
+    static bool recvAll(socket_t s, uint8_t *buf, size_t len);
 };

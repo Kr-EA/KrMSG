@@ -17,6 +17,13 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        auth.ui
+        auth.cpp
+        auth.h
+        appprotocol.cpp
+        appprotocol.h
+        tcpconnection.cpp
+        tcpconnection.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -41,6 +48,7 @@ else()
     else()
         add_executable(KrMSG
             ${PROJECT_SOURCES}
+            appprotocol.cpp appprotocol.h auth.cpp auth.h auth.ui tcpconnection.cpp tcpconnection.h
         )
     endif()
 endif()
