@@ -44,6 +44,12 @@ MainWindow::MainWindow(QWidget *parent)
     } else {
         qDebug() << "Failed to connect";
     }
+
+    auto bar = ui->chatView->verticalScrollBar();
+    connect(bar, &QScrollBar::rangeChanged, this,
+            [bar](int /*min*/, int /*max*/) {
+                bar->setValue(bar->maximum());
+            });
 }
 
 void MainWindow::setUsername(QString val){
@@ -94,10 +100,6 @@ void MainWindow::addMessage(const QString &author, const QString &text, bool fro
 
     int insertPos = chatLayout->count() - 1;
     chatLayout->insertWidget(insertPos, msgWidget);
-
-    if (auto *bar = ui->chatView->verticalScrollBar()) {
-        bar->setValue(bar->maximum());
-    }
 }
 
 void MainWindow::onSendButtonClicked()
