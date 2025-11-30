@@ -37,6 +37,8 @@ private:
     QVBoxLayout *chatLayout = nullptr;
     QString username;
 
+    int barPrevMaxPosition;
+
     TCPConnection  m_connection;
     std::thread    m_receiverThread;
     std::atomic<bool> m_running{false};

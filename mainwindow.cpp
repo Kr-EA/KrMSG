@@ -15,7 +15,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , m_connection("127.0.0.1", "8080", 1024)
+    , m_connection("72.56.70.125", "8080", 1024)
 {
     ui->setupUi(this);
 
@@ -42,8 +42,14 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     auto bar = ui->chatView->verticalScrollBar();
-    connect(bar, &QScrollBar::rangeChanged, this, [bar](int /*min*/, int /*max*/) {
-        bar->setValue(bar->maximum());
+    barPrevMaxPosition = bar->maximum();
+    connect(bar, &QScrollBar::rangeChanged, this,
+        [this, bar](int /*min*/, int /*max*/) {
+        if(bar->value() == barPrevMaxPosition){
+            bar->setValue(bar->maximum());
+            barPrevMaxPosition = bar->maximum();
+        }
+        barPrevMaxPosition = bar->maximum();
     });
 }
 
