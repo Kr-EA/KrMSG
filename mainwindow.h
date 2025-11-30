@@ -1,16 +1,16 @@
-// mainwindow.h
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QVBoxLayout>
-#include <thread>
-#include <atomic>
 #include "tcpconnection.h"
+#include <atomic>
+#include <thread>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -37,8 +37,8 @@ private:
     QVBoxLayout *chatLayout = nullptr;
     QString username;
 
-    TCPConnection  m_connection;
-    std::thread    m_receiverThread;
+    TCPConnection m_connection;
+    std::thread m_receiverThread;
     std::atomic<bool> m_running{false};
 };
 

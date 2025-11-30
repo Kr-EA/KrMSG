@@ -1,7 +1,8 @@
 #include "tcpconnection.h"
 #include <sstream>
 
-std::vector<std::string> splitString(const std::string& s, char delimiter) {
+std::vector<std::string> splitString(const std::string &s, char delimiter)
+{
     std::vector<std::string> tokens;
     std::stringstream ss(s);
     std::string token;
@@ -12,7 +13,8 @@ std::vector<std::string> splitString(const std::string& s, char delimiter) {
     return tokens;
 }
 
-TCPConnection::TCPConnection(const char* HOST, const char* PORT, const int BUFFER_SIZE) {
+TCPConnection::TCPConnection(const char *HOST, const char *PORT, const int BUFFER_SIZE)
+{
     buffer_size = BUFFER_SIZE;
     sock = INVALID_SOCKET;
 
@@ -26,7 +28,7 @@ TCPConnection::TCPConnection(const char* HOST, const char* PORT, const int BUFFE
 #endif
 
     struct addrinfo hints{}, *res = nullptr;
-    hints.ai_family   = AF_INET;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = 0;
 
@@ -40,7 +42,7 @@ TCPConnection::TCPConnection(const char* HOST, const char* PORT, const int BUFFE
         return;
     }
 
-    for (struct addrinfo* p = res; p != nullptr; p = p->ai_next) {
+    for (struct addrinfo *p = res; p != nullptr; p = p->ai_next) {
         socket_t s = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (s == INVALID_SOCKET) {
             continue;
@@ -69,10 +71,12 @@ TCPConnection::TCPConnection(const char* HOST, const char* PORT, const int BUFFE
     }
 }
 
-void TCPConnection::sendMessage(const std::vector<uint8_t>& data) {
-    if (sock == INVALID_SOCKET) return;
+void TCPConnection::sendMessage(const std::vector<uint8_t> &data)
+{
+    if (sock == INVALID_SOCKET)
+        return;
 
-    const char* ptr = reinterpret_cast<const char*>(data.data());
+    const char *ptr = reinterpret_cast<const char *>(data.data());
     size_t total = 0;
     size_t len = data.size();
 
@@ -86,16 +90,15 @@ void TCPConnection::sendMessage(const std::vector<uint8_t>& data) {
     }
 }
 
-bool TCPConnection::recvAll(socket_t s, uint8_t* buf, size_t len) {
+bool TCPConnection::recvAll(socket_t s, uint8_t *buf, size_t len)
+{
     size_t total = 0;
 
     while (total < len) {
-        int received = recv(
-            s,
-            reinterpret_cast<char*>(buf + total),
-            static_cast<int>(len - total),
-            0
-            );
+        int received = recv(s,
+                            reinterpret_cast<char *>(buf + total),
+                            static_cast<int>(len - total),
+                            0);
 
         if (received <= 0) {
             return false;
@@ -107,8 +110,10 @@ bool TCPConnection::recvAll(socket_t s, uint8_t* buf, size_t len) {
     return true;
 }
 
-std::string TCPConnection::receiveMessage() {
-    if (sock == INVALID_SOCKET) return "";
+std::string TCPConnection::receiveMessage()
+{
+    if (sock == INVALID_SOCKET)
+        return "";
 
     uint8_t header[3];
     if (!recvAll(sock, header, 3)) {
@@ -116,11 +121,9 @@ std::string TCPConnection::receiveMessage() {
     }
 
     uint8_t type = header[0];
-    (void)type;
+    (void) type;
 
-    uint16_t length =
-        (static_cast<uint16_t>(header[1]) << 8) |
-        static_cast<uint16_t>(header[2]);
+    uint16_t length = (static_cast<uint16_t>(header[1]) << 8) | static_cast<uint16_t>(header[2]);
 
     if (length > 65535) {
         std::cerr << "Invalid length: " << length << "\n";
@@ -141,7 +144,8 @@ std::string TCPConnection::receiveMessage() {
     return result;
 }
 
-void TCPConnection::closeConnection() {
+void TCPConnection::closeConnection()
+{
     if (sock != INVALID_SOCKET) {
 #ifdef _WIN32
         closesocket(sock);
@@ -153,28 +157,29 @@ void TCPConnection::closeConnection() {
     }
 }
 
-std::vector<std::string> TCPConnection::messageFragmentation(std::string message, int packet_size){
+std::vector<std::string> TCPConnection::messageFragmentation(std::string message, int packet_size)
+{
     std::vector<std::string> words = splitString(message, ' ');
     std::vector<std::string> packets{};
     std::string packet{};
-    for (std::string word: words){
-        if(packet.size() + word.size() + 1 < packet_size){
+    for (std::string word : words) {
+        if (packet.size() + word.size() + 1 < packet_size) {
             word.append(" ");
             packet.append(word);
-        }
-        else{
+        } else {
             packets.push_back(packet);
             packet.clear();
             word.append(" ");
             packet.append(word);
         }
     }
-    if (!packet.empty()){
+    if (!packet.empty()) {
         packets.push_back(packet);
     }
     return packets;
 }
 
-TCPConnection::~TCPConnection() {
+TCPConnection::~TCPConnection()
+{
     closeConnection();
 }
