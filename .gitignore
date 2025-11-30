@@ -1,0 +1,10 @@
+build*/
+*.user
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.log
+*.qm
