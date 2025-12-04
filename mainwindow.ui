@@ -14,41 +14,55 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,3">
     <item>
-     <widget class="QScrollArea" name="chatView">
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>774</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>774</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </widget>
+     <widget class="QListWidget" name="listWidget"/>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <widget class="QLineEdit" name="messageInput"/>
+       <widget class="QScrollArea" name="chatView">
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>774</width>
+           <height>464</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>774</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="sendMessage">
-        <property name="text">
-         <string>Send</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLineEdit" name="messageInput">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="sendMessage">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Send</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -60,7 +74,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>38</height>
     </rect>
    </property>
   </widget>

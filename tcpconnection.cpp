@@ -1,4 +1,5 @@
 #include "tcpconnection.h"
+#include <iostream>
 #include <sstream>
 
 std::vector<std::string> splitString(const std::string &s, char delimiter)
@@ -112,18 +113,16 @@ bool TCPConnection::recvAll(socket_t s, uint8_t *buf, size_t len)
 
 std::string TCPConnection::receiveMessage()
 {
-    if (sock == INVALID_SOCKET)
-        return "";
+    if (sock == -1) return "";
 
-    uint8_t header[3];
-    if (!recvAll(sock, header, 3)) {
+    uint8_t header[4];
+    if (!recvAll(sock, header, 4)) {
         return "";
     }
 
     uint8_t type = header[0];
-    (void) type;
-
-    uint16_t length = (static_cast<uint16_t>(header[1]) << 8) | static_cast<uint16_t>(header[2]);
+    uint16_t length = (static_cast<uint16_t>(header[1]) << 8) | header[2];
+    uint8_t reciever = header[3];
 
     if (length > 65535) {
         std::cerr << "Invalid length: " << length << "\n";
@@ -136,12 +135,21 @@ std::string TCPConnection::receiveMessage()
     }
 
     std::string result;
-    result.reserve(length);
-    for (uint8_t ch : data) {
-        result.push_back(static_cast<char>(ch));
+    for (uint8_t ch : data){
+        result += ch;
     }
 
-    return result;
+    if (type == 4){
+        clientsEnumeration.erase(result);
+        return "clientSYNC";
+    }
+
+    if (type == 3){
+        clientsEnumeration[result] = reciever;
+        return "clientSYNC";
+    }
+
+    else return result;
 }
 
 void TCPConnection::closeConnection()

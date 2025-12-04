@@ -3,8 +3,10 @@
 
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include <QListWidgetItem>
 #include "tcpconnection.h"
 #include <atomic>
+#include <map>
 #include <thread>
 
 QT_BEGIN_NAMESPACE
@@ -12,6 +14,11 @@ namespace Ui {
 class MainWindow;
 }
 QT_END_NAMESPACE
+
+struct MessageInfo{
+    std::string author;
+    std::string msg;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -29,9 +36,12 @@ private slots:
     void messageReciever(const QString &author, const QString &msg);
     void onSendButtonClicked();
 
+    void on_listWidget_itemClicked(QListWidgetItem *item);
+
 private:
     void receiveLoop();
-    void addMessage(const QString &author, const QString &text, bool fromMe);
+    void addMessage(const QString &author, const QString &text, bool fromMe, bool isLoaded);
+    void loadMessages(std::string user);
 
     Ui::MainWindow *ui;
     QVBoxLayout *chatLayout = nullptr;
@@ -39,7 +49,11 @@ private:
 
     int barPrevMaxPosition;
 
+    MessageInfo getMessageInfo(std::string);
+
     TCPConnection  m_connection;
+    std::string recieverName;
+    std::map<std::string, std::vector<std::string>> histories;
     std::thread    m_receiverThread;
     std::atomic<bool> m_running{false};
 };

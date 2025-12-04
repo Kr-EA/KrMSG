@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <iostream>
 #include <string>
+#include <map>
 #include <vector>
 
 #ifdef _WIN32
@@ -37,6 +37,8 @@ public:
     std::string receiveMessage();
     void closeConnection();
 
+    std::map<std::string, int> clientsEnumeration;
+
     std::vector<std::string> messageFragmentation(std::string message, int packet_size);
 
     bool isConnected() const { return sock != INVALID_SOCKET; }
@@ -44,6 +46,5 @@ public:
 private:
     socket_t sock{INVALID_SOCKET};
     int buffer_size{0};
-
     static bool recvAll(socket_t s, uint8_t *buf, size_t len);
 };

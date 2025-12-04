@@ -29,10 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
     chatLayout = new QVBoxLayout(container);
     chatLayout->setContentsMargins(10, 10, 10, 10);
     chatLayout->setSpacing(4);
-    chatLayout->addStretch(1);
+    //chatLayout->addStretch(1);
+    QSpacerItem *bottomSpacer = new QSpacerItem(
+        0, 0,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding
+        );
+
+    chatLayout->addItem(bottomSpacer);
 
     ui->chatView->setWidget(container);
-    ui->chatView->setWidgetResizable(true);
 
     if (m_connection.isConnected()) {
         m_running = true;
@@ -53,15 +59,40 @@ MainWindow::MainWindow(QWidget *parent)
     });
 }
 
+MessageInfo MainWindow::getMessageInfo(std::string reply){
+    std::string author{};
+    std::string answer{};
+
+    int flag = 0;
+
+    for (int i = 0; i < reply.size(); i++) {
+        if (reply[i] == ':') {
+            flag = 1;
+            continue;
+        }
+        if (flag == 0) {
+            author += reply[i];
+        } else {
+            answer += reply[i];
+        }
+    }
+
+    MessageInfo result;
+    result.author = author;
+    result.msg = answer;
+
+    return result;
+}
+
 void MainWindow::setUsername(QString val)
 {
     username = val;
-    AppProtocol data(2, username.toStdString());
+    AppProtocol data(2, 0, username.toStdString());
     std::vector<uint8_t> packet = data.getCode();
     m_connection.sendMessage(packet);
 }
 
-void MainWindow::addMessage(const QString &author, const QString &text, bool fromMe)
+void MainWindow::addMessage(const QString &author, const QString &text, bool fromMe, bool isLoaded)
 {
     if (!chatLayout)
         return;
@@ -94,14 +125,18 @@ void MainWindow::addMessage(const QString &author, const QString &text, bool fro
         v->addWidget(label);
         h->addLayout(v);
     } else {
-        v->addWidget(authorView);
-        v->addWidget(label);
-        h->addLayout(v);
-        h->addStretch();
+        if (author == recieverName){
+            v->addWidget(authorView);
+            v->addWidget(label);
+            h->addLayout(v);
+            h->addStretch();
+        }
     }
 
-    int insertPos = chatLayout->count() - 1;
-    chatLayout->insertWidget(insertPos, msgWidget);
+    if (fromMe || author == recieverName){
+        chatLayout->addWidget(msgWidget);
+    }
+    if (!isLoaded) histories[author.toStdString() == "You" ? recieverName : author.toStdString()].push_back(author.toStdString() + ":" + text.toStdString());
 }
 
 void MainWindow::onSendButtonClicked()
@@ -117,9 +152,9 @@ void MainWindow::onSendButtonClicked()
     std::vector<std::string> fragments = m_connection.messageFragmentation(input, 256);
 
     for (std::string fragment : fragments) {
-        addMessage(me, QString::fromStdString(fragment), true);
+        addMessage(me, QString::fromStdString(fragment), true, false);
 
-        AppProtocol data(1, fragment);
+        AppProtocol data(1, m_connection.clientsEnumeration[recieverName], fragment);
         std::vector<uint8_t> packet = data.getCode();
         m_connection.sendMessage(packet);
     }
@@ -132,32 +167,25 @@ void MainWindow::receiveLoop()
     while (m_running && m_connection.isConnected()) {
         std::string reply = m_connection.receiveMessage();
 
-        std::string author{};
-        std::string answer{};
-
-        int flag = 0;
-
-        for (int i = 0; i < reply.size(); i++) {
-            if (reply[i] == ':') {
-                flag = 1;
-                continue;
-            }
-            if (flag == 0) {
-                author += reply[i];
-            } else {
-                answer += reply[i];
-            }
-        }
+        MessageInfo info = getMessageInfo(reply);
 
         if (!reply.empty()) {
-            emit message(QString::fromStdString(author), QString::fromStdString(answer));
+            if (reply == "clientSYNC"){
+                ui->listWidget->clear();
+                for (auto const& it:m_connection.clientsEnumeration){
+                    ui->listWidget->addItem(QString::fromStdString(it.first));
+                }
+            }
+            else{
+                emit message(QString::fromStdString(info.author), QString::fromStdString(info.msg));
+            }
         }
     }
 }
 
 void MainWindow::messageReciever(const QString &author, const QString &msg)
 {
-    addMessage(author, msg, false);
+    addMessage(author, msg, false, false);
 }
 
 MainWindow::~MainWindow()
@@ -171,3 +199,33 @@ MainWindow::~MainWindow()
 
     delete ui;
 }
+
+void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
+{
+    if (recieverName != item->text().toStdString()){
+        recieverName = item->text().toStdString();
+        ui->messageInput->setEnabled(true);
+        ui->sendMessage->setEnabled(true);
+        QWidget* container = ui->chatView->widget();
+        QVBoxLayout* messages = container->findChild<QVBoxLayout *>();
+        QLayoutItem* message;
+        while ((message = messages->takeAt(0)) != nullptr) {
+            if (QWidget* widget = message->widget()) {
+                delete widget;
+            }
+            delete message;
+        }
+
+        messages->addItem(new QSpacerItem(
+            0, 0,
+            QSizePolicy::Minimum,
+            QSizePolicy::Expanding
+        ));
+
+        for (std::string msg: histories[recieverName]){
+            MessageInfo msgInfo = getMessageInfo(msg);
+            addMessage(QString::fromStdString(msgInfo.author), QString::fromStdString(msgInfo.msg), msgInfo.author == "You", true);
+        }
+    }
+}
+
