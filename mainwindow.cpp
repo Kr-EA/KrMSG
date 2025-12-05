@@ -132,7 +132,7 @@ void MainWindow::addMessage(const QString &author, const QString &text, bool fro
         }
     }
 
-    if (fromMe || author == recieverName){
+    if (fromMe || author.toStdString() == recieverName){
         chatLayout->addWidget(msgWidget);
     }
     if (!isLoaded) histories[author.toStdString() == "You" ? recieverName : author.toStdString()].push_back(author.toStdString() + ":" + text.toStdString());
