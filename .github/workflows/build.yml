@@ -79,13 +79,13 @@ jobs:
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: KrMSG-mac-dmg
+          name: KrMSG-mac
           path: dist
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: KrMSG-windows-zip
+          name: KrMSG-windows
           path: dist
 
       - name: Create GitHub Release
