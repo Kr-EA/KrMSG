@@ -21,7 +21,6 @@ jobs:
           cd build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
-            -G "Xcode"
 
       - name: Build
         run: |
