@@ -24,7 +24,7 @@ jobs:
       - name: Deploy macOS
         run: |
           cd build
-          macdeployqt KrMSG.app -dmg --strip
+          macdeployqt KrMSG.app -dmg
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
