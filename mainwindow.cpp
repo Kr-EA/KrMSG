@@ -124,7 +124,7 @@ void MainWindow::addMessage(const QString &author, const QString &text, bool fro
         v->addWidget(label);
         h->addLayout(v);
     } else {
-        if (author == recieverName){
+        if (author.toStdString() == recieverName){
             v->addWidget(authorView);
             v->addWidget(label);
             h->addLayout(v);
