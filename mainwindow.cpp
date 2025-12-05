@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
     chatLayout = new QVBoxLayout(container);
     chatLayout->setContentsMargins(10, 10, 10, 10);
     chatLayout->setSpacing(4);
-    //chatLayout->addStretch(1);
     QSpacerItem *bottomSpacer = new QSpacerItem(
         0, 0,
         QSizePolicy::Minimum,
