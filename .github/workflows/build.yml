@@ -51,7 +51,7 @@ jobs:
       - name: Deploy Windows
         run: |
           cd build\Release
-          windeployqt KrMSG.exe --release --strip
+          windeployqt KrMSG.exe --release
       - name: Pack Windows into ZIP
         run: |
           cd build\Release
