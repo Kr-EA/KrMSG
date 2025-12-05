@@ -72,3 +72,34 @@ jobs:
         with:
           name: KrMSG-windows
           path: build/Release/
+  create-release:
+    needs: [build-mac, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: KrMSG-mac-dmg
+          path: dist
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: KrMSG-windows-zip
+          path: dist
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0
+          name: KrMSG v1.0
+          body: |
+            Готовые бинарники для macOS и Windows!
+            - macOS: KrMSG.dmg
+            - Windows: KrMSG-windows.zip
+          files: |
+            dist/KrMSG.dmg
+            dist/KrMSG-windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
