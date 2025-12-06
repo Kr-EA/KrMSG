@@ -191,10 +191,10 @@ MainWindow::~MainWindow()
 {
     m_running = false;
 
+    m_connection.closeConnection();
+
     if (m_receiverThread.joinable())
         m_receiverThread.join();
-
-    m_connection.closeConnection();
 
     delete ui;
 }
