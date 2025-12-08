@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <QFileInfo>
+#include <QString>
 #include <fstream>
 #include "appprotocol.h"
 
