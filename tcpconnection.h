@@ -20,12 +20,18 @@ using socket_t = SOCKET;
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <QString>
 
 using socket_t = int;
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET (-1)
 #endif
 #endif
+
+struct Msg{
+    int type;
+    std::string msg;
+};
 
 class TCPConnection
 {
@@ -34,12 +40,13 @@ public:
     ~TCPConnection();
 
     void sendMessage(const std::vector<uint8_t> &data);
-    std::string receiveMessage();
+    Msg receiveMessage();
     void closeConnection();
 
     std::map<std::string, int> clientsEnumeration;
 
     std::vector<std::string> messageFragmentation(std::string message, int packet_size);
+    void sendFile(QString file, QString prefix, int, int);
 
     bool isConnected() const { return sock != INVALID_SOCKET; }
 
@@ -47,4 +54,5 @@ private:
     socket_t sock{INVALID_SOCKET};
     int buffer_size{0};
     static bool recvAll(socket_t s, uint8_t *buf, size_t len);
+    static bool sendAll(int sock, const void* data, size_t len);
 };

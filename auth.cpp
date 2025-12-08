@@ -29,7 +29,9 @@ void Auth::on_submit_clicked()
 {
     QString input = ui->username->text();
     if (input.size() > 3 && input.indexOf(":") == -1) {
-        setUsername(input);
-        this->close();
+        if (input != "Broadcast" && input != "You"){
+            setUsername(input);
+            this->close();
+        }
     }
 }

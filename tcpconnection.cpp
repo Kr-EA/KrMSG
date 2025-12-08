@@ -1,6 +1,9 @@
 #include "tcpconnection.h"
 #include <iostream>
 #include <sstream>
+#include <QFileInfo>
+#include <fstream>
+#include "appprotocol.h"
 
 std::vector<std::string> splitString(const std::string &s, char delimiter)
 {
@@ -72,6 +75,39 @@ TCPConnection::TCPConnection(const char *HOST, const char *PORT, const int BUFFE
     }
 }
 
+void TCPConnection::sendFile(QString file, QString prefix, int reciever, int fragment_size){
+
+    QFileInfo info(file);
+
+    AppProtocol startFile(10, reciever, (prefix+'_'+info.fileName()).toStdString());
+    std::vector<uint8_t> packet = startFile.getCode();
+    sendMessage(packet);
+
+    std::ifstream filestream(file.toStdString(), std::ios::binary);
+
+    std::vector<uint8_t> buffer(fragment_size);
+
+    while (true) {
+        filestream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+        std::streamsize bytesRead = filestream.gcount();
+
+        if (bytesRead <= 0)
+            break;
+
+        AppProtocol partFile(11, reciever, buffer);
+        packet = partFile.getCode();
+        sendMessage(packet);
+
+        if (bytesRead < static_cast<std::streamsize>(fragment_size))
+            break;
+    }
+    filestream.close();
+
+    AppProtocol endFile(12, reciever, (prefix+'_'+info.fileName()).toStdString());
+    packet = endFile.getCode();
+    sendMessage(packet);
+}
+
 void TCPConnection::sendMessage(const std::vector<uint8_t> &data)
 {
     if (sock == INVALID_SOCKET)
@@ -111,27 +147,44 @@ bool TCPConnection::recvAll(socket_t s, uint8_t *buf, size_t len)
     return true;
 }
 
-std::string TCPConnection::receiveMessage()
+bool TCPConnection::sendAll(int sock, const void* data, size_t len) {
+    const char* ptr = static_cast<const char*>(data);
+    size_t totalSent = 0;
+
+    while (totalSent < len) {
+        int sent = ::send(sock, ptr + totalSent, len - totalSent, 0);
+        if (sent <= 0) {
+            return false;
+        }
+        totalSent += sent;
+    }
+    return true;
+}
+
+Msg TCPConnection::receiveMessage()
 {
-    if (sock == -1) return "";
+    Msg msg;
+    if (sock == -1) return msg;
 
     uint8_t header[4];
     if (!recvAll(sock, header, 4)) {
-        return "";
+        return msg;
     }
 
     uint8_t type = header[0];
     uint16_t length = (static_cast<uint16_t>(header[1]) << 8) | header[2];
     uint8_t reciever = header[3];
 
+    msg.type = type;
+
     if (length > 65535) {
         std::cerr << "Invalid length: " << length << "\n";
-        return "";
+        return msg;
     }
 
     std::vector<uint8_t> data(length);
     if (length > 0 && !recvAll(sock, data.data(), length)) {
-        return "";
+        return msg;
     }
 
     std::string result;
@@ -141,15 +194,19 @@ std::string TCPConnection::receiveMessage()
 
     if (type == 4){
         clientsEnumeration.erase(result);
-        return "clientSYNC";
+        msg.msg = "clientSYNC";
+        return msg;
     }
 
     if (type == 3){
         clientsEnumeration[result] = reciever;
-        return "clientSYNC";
+        msg.msg = "clientSYNC";
+        return msg;
     }
 
-    else return result;
+    else msg.msg = result;
+
+    return msg;
 }
 
 void TCPConnection::closeConnection()
