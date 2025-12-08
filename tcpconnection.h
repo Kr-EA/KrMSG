@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <QString>
 
 #ifdef _WIN32
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -46,7 +47,7 @@ public:
     std::map<std::string, int> clientsEnumeration;
 
     std::vector<std::string> messageFragmentation(std::string message, int packet_size);
-    void sendFile(QString file, QString prefix, int, int);
+    void sendFile(QString file, QString prefix, int reciever, int fragment_size);
 
     bool isConnected() const { return sock != INVALID_SOCKET; }
 
