@@ -95,13 +95,16 @@ void TCPConnection::sendFile(QString file, QString prefix, int reciever, int fra
         if (bytesRead <= 0)
             break;
 
-        AppProtocol partFile(11, reciever, buffer);
-        packet = partFile.getCode();
+        std::vector<uint8_t> chunk(buffer.begin(), buffer.begin() + bytesRead);
+
+        AppProtocol partFile(11, reciever, chunk);
+        std::vector<uint8_t> packet = partFile.getCode();
         sendMessage(packet);
 
         if (bytesRead < static_cast<std::streamsize>(fragment_size))
             break;
     }
+
     filestream.close();
 
     AppProtocol endFile(12, reciever, (prefix+'_'+info.fileName()).toStdString());
