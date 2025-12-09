@@ -400,7 +400,7 @@ void MainWindow::sendFile(QString filename, QString prefix){
     ui->sendMessage->setEnabled(false);
     m_connection.sendFile(filename, prefix, recieverName == "Broadcast" ? 0 : m_connection.clientsEnumeration[recieverName], 4096);
     ui->sendFile->setEnabled(true);
-    ui->sendMessage->setEnabled(false);
+    ui->sendMessage->setEnabled(true);
 }
 
 
